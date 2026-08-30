@@ -39,3 +39,4 @@ export async function seedUsers() {
     console.log('✅ Super Admin created via auth.api.createUser.')
   }
 }
+

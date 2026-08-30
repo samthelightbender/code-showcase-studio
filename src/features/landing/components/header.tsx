@@ -109,9 +109,8 @@ export default function Header() {
                     {session.user.name}
                   </span>
                   <ChevronDown
-                    className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${
-                      dropdownOpen ? 'rotate-180' : ''
-                    }`}
+                    className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''
+                      }`}
                   />
                 </button>
 

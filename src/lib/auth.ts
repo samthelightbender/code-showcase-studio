@@ -1,8 +1,7 @@
 import bcrypt from 'bcryptjs'
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
-import { admin, openAPI } from 'better-auth/plugins'
-import { username } from 'better-auth/plugins'
+import { admin, openAPI, username } from 'better-auth/plugins'
 import sendEmail from '@/lib/email'
 import { emailOTP } from 'better-auth/plugins'
 import prisma from '@/../prisma/prisma'
@@ -46,16 +45,6 @@ export const auth = betterAuth({
   },
   disabledPaths: [
     // Select some un-used path from better-auth
-    // "/sign-in/social",
-    // "/verify-email",
-    // "/send-verification-email",
-    // "/change-email",
-    // "/update-user",
-    // "/delete-user",
-    // "/link-social",
-    // "/delete-user/callback",
-    // "/unlink-account",
-    // "/account-info",
   ],
   trustedOrigins: [
     'http://localhost:3000',
@@ -116,3 +105,4 @@ export const auth = betterAuth({
     max: 30, // max requests in the window
   },
 })
+

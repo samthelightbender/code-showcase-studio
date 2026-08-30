@@ -8,3 +8,4 @@ const authClient = createAuthClient({
   plugins: [inferAdditionalFields<typeof auth>(), emailOTPClient(), usernameClient()],
 })
 export default authClient
+
