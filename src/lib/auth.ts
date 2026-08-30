@@ -8,6 +8,7 @@ import { emailOTP } from 'better-auth/plugins'
 import prisma from '@/../prisma/prisma'
 
 export const auth = betterAuth({
+  baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:3000',
   plugins: [
     openAPI(),
     emailOTP({
@@ -57,7 +58,9 @@ export const auth = betterAuth({
     // "/account-info",
   ],
   trustedOrigins: [
-    // add your trusted origin, example: https://ngodestudio.my.id
+    'http://localhost:3000',
+    'http://localhost:3002',
+    'http://127.0.0.1:3000',
     'localhost:3000',
     'localhost:3002',
   ],
