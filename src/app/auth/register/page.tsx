@@ -22,6 +22,7 @@ import { useRouter } from 'next/navigation'
 const formSchema = z
   .object({
     fullName: z.string().min(1, { message: 'Full name is required.' }),
+    username: z.string().min(1, { message: 'Username is required.' }),
     email: z.string().email({
       message: 'Please enter a valid email address.',
     }),
@@ -56,6 +57,7 @@ export default function RegisterPage() {
     await authClient.signUp.email(
       {
         email: values.email,
+        username: values.username,
         password: values.password,
         name: values.fullName,
       },
@@ -114,6 +116,20 @@ export default function RegisterPage() {
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <FormControl>
+                      <Input placeholder="johndoe" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <FormField
                 control={form.control}
                 name="password"

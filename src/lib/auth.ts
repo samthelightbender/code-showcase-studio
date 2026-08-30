@@ -1,7 +1,8 @@
 import bcrypt from 'bcryptjs'
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
-import { openAPI } from 'better-auth/plugins'
+import { admin, openAPI } from 'better-auth/plugins'
+import { username } from 'better-auth/plugins'
 import sendEmail from '@/lib/email'
 import { emailOTP } from 'better-auth/plugins'
 import prisma from '@/../prisma/prisma'
@@ -32,7 +33,13 @@ export const auth = betterAuth({
         }
       },
     }),
+    username(),
+    admin({
+      defaultRole: 'USER',
+      adminRoles: ['MODERATOR', 'ADMIN'],
+    }),
   ],
+
   emailVerification: {
     autoSignInAfterVerification: true,
   },
