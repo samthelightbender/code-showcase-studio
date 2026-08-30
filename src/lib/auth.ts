@@ -1,12 +1,13 @@
 import bcrypt from 'bcryptjs'
 import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
-import { openAPI } from 'better-auth/plugins'
+import { admin, openAPI, username } from 'better-auth/plugins'
 import sendEmail from '@/lib/email'
 import { emailOTP } from 'better-auth/plugins'
 import prisma from '@/../prisma/prisma'
 
 export const auth = betterAuth({
+  baseURL: process.env.BETTER_AUTH_URL || 'http://localhost:3000',
   plugins: [
     openAPI(),
     emailOTP({
@@ -32,25 +33,23 @@ export const auth = betterAuth({
         }
       },
     }),
+    username(),
+    admin({
+      defaultRole: 'USER',
+      adminRoles: ['MODERATOR', 'ADMIN'],
+    }),
   ],
+
   emailVerification: {
     autoSignInAfterVerification: true,
   },
   disabledPaths: [
     // Select some un-used path from better-auth
-    // "/sign-in/social",
-    // "/verify-email",
-    // "/send-verification-email",
-    // "/change-email",
-    // "/update-user",
-    // "/delete-user",
-    // "/link-social",
-    // "/delete-user/callback",
-    // "/unlink-account",
-    // "/account-info",
   ],
   trustedOrigins: [
-    // add your trusted origin, example: https://ngodestudio.my.id
+    'http://localhost:3000',
+    'http://localhost:3002',
+    'http://127.0.0.1:3000',
     'localhost:3000',
     'localhost:3002',
   ],
@@ -78,6 +77,12 @@ export const auth = betterAuth({
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
     },
   },
+  account: {
+    accountLinking: {
+      enabled: true,
+      trustedProviders: ['google', 'github', 'email-password'],
+    },
+  },
   database: prismaAdapter(prisma, {
     provider: 'postgresql',
   }),
@@ -100,3 +105,4 @@ export const auth = betterAuth({
     max: 30, // max requests in the window
   },
 })
+

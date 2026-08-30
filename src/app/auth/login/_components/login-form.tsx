@@ -31,9 +31,13 @@ import authClient from '@/lib/auth-client'
 import { useRouter } from 'next/navigation'
 
 const formSchema = z.object({
-  email: z.string().email({
-    message: 'Please enter a valid email address.',
-  }),
+  identifier: z
+    .string()
+    .min(1, { message: 'Email or username is required.' })
+    .refine((value) => z.string().email().safeParse(value).success || value.length > 0, {
+      message: 'Please enter a valid email address or username.',
+      path: ['identifier'],
+    }),
   password: z.string().min(1, {
     message: 'Password is required.',
   }),
@@ -47,7 +51,7 @@ export function LoginForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: '',
+      identifier: '',
       password: '',
     },
   })
@@ -55,35 +59,61 @@ export function LoginForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading(true)
 
-    await authClient.signIn.email(
-      {
-        email: values.email,
-        password: values.password,
-        rememberMe,
-        callbackURL: '/feeds',
-      },
-      {
-        onResponse: () => {
-          setLoading(false)
+    const isEmail = z.string().email().safeParse(values.identifier).success
+
+    if (isEmail) {
+      await authClient.signIn.email(
+        {
+          email: values.identifier,
+          password: values.password,
+          rememberMe,
+          callbackURL: '/feeds',
         },
-        onError: (error) => {
-          setLoading(false)
+        {
+          onResponse: () => {
+            setLoading(false)
+          },
+          onError: (error) => {
+            setLoading(false)
 
-          if (error.error.code === 'EMAIL_NOT_VERIFIED') {
-            sessionStorage.setItem('email_for_verification', values.email)
-            return router.push(`/auth/email-verification`)
-          }
+            if (error.error.code === 'EMAIL_NOT_VERIFIED') {
+              sessionStorage.setItem('email_for_verification', values.identifier)
+              return router.push(`/auth/email-verification`)
+            }
 
-          const errorMessage = error.error.message || 'An unexpected error occurred.'
-
-          form.setError('email', { type: 'server' })
-          form.setError('password', {
-            type: 'server',
-            message: errorMessage,
-          })
+            const errorMessage = error.error.message || 'An unexpected error occurred.'
+            form.setError('identifier', { type: 'server' })
+            form.setError('password', { type: 'server', message: errorMessage })
+          },
+        }
+      )
+    } else {
+      await authClient.signIn.username(
+        {
+          username: values.identifier,
+          password: values.password,
+          rememberMe,
+          callbackURL: '/feeds',
         },
-      }
-    )
+        {
+          onResponse: () => {
+            setLoading(false)
+          },
+          onError: (error) => {
+            console.log(error.error)
+            setLoading(false)
+            if (error.error.code === 'EMAIL_NOT_VERIFIED') {
+              sessionStorage.setItem('email_for_verification', values.identifier)
+              return router.push(`/auth/email-verification`)
+            }
+
+            const errorMessage = error.error.message || 'An unexpected error occurred.'
+            form.setError('identifier', { type: 'server' })
+            form.setError('password', { type: 'server', message: errorMessage })
+          },
+        }
+      )
+    }
   }
 
   return (
@@ -100,12 +130,13 @@ export function LoginForm() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
             <FormField
               control={form.control}
-              name="email"
+              name="identifier"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>Email or Username</FormLabel>
                   <FormControl>
-                    <Input placeholder="m@example.com" {...field} />
+                    <Input placeholder="m@example.com or username" {...field} />
+
                   </FormControl>
                   <FormMessage />
                 </FormItem>

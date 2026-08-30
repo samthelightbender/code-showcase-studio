@@ -82,6 +82,7 @@ export default function EmailVerificationPage() {
   useEffect(() => {
     const timer = handleCoolDown()
 
+
     // Clean up the interval when the component unmounts
     return () => clearInterval(timer)
   }, [])
