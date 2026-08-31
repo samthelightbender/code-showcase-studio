@@ -174,7 +174,7 @@ export function LoginForm() {
               <Label htmlFor="remember">Ingat Saya</Label>
             </div>
 
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button type="submit" className="w-full" disabled={loading} data-testid="login-button">
               {loading ? <Loader2 size={16} className="animate-spin" /> : 'Login'}
             </Button>
           </form>
