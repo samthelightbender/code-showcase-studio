@@ -100,6 +100,31 @@ describe('LoginForm', () => {
     })
   })
 
+  it('redirects to feeds after successful username login', async () => {
+    const push = vi.fn()
+    ;(useRouter as unknown as ReturnType<typeof vi.fn>).mockReturnValue({ push })
+    ;(authClient.signIn.username as ReturnType<typeof vi.fn>).mockImplementation(
+      async (_data, callbacks) => {
+        callbacks?.onSuccess?.()
+      }
+    )
+
+    render(<LoginForm />)
+
+    fireEvent.change(screen.getByLabelText(/Email or Username/i), {
+      target: { value: 'testuser' },
+    })
+    fireEvent.change(screen.getByLabelText(/Kata Sandi/i), {
+      target: { value: 'password123' },
+    })
+
+    fireEvent.click(screen.getByTestId('login-button'))
+
+    await waitFor(() => {
+      expect(push).toHaveBeenCalledWith('/feeds')
+    })
+  })
+
   it('calls signIn.social when Google button is clicked', async () => {
     render(<LoginForm />)
     

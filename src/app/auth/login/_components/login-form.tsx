@@ -59,6 +59,18 @@ export function LoginForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading(true)
 
+    const handleError = (error: { error: { message?: string } }) => {
+      setLoading(false)
+      const errorMessage = error.error.message || 'An unexpected error occurred.'
+      form.setError('identifier', { type: 'server' })
+      form.setError('password', { type: 'server', message: errorMessage })
+    }
+
+    const handleSuccess = () => {
+      setLoading(false)
+      router.push('/feeds')
+    }
+
     const isEmail = z.string().email().safeParse(values.identifier).success
 
     if (isEmail) {
@@ -70,21 +82,8 @@ export function LoginForm() {
           callbackURL: '/feeds',
         },
         {
-          onResponse: () => {
-            setLoading(false)
-          },
-          onError: (error) => {
-            setLoading(false)
-
-            if (error.error.code === 'EMAIL_NOT_VERIFIED') {
-              sessionStorage.setItem('email_for_verification', values.identifier)
-              return router.push(`/auth/email-verification`)
-            }
-
-            const errorMessage = error.error.message || 'An unexpected error occurred.'
-            form.setError('identifier', { type: 'server' })
-            form.setError('password', { type: 'server', message: errorMessage })
-          },
+          onSuccess: handleSuccess,
+          onError: handleError,
         }
       )
     } else {
@@ -96,21 +95,8 @@ export function LoginForm() {
           callbackURL: '/feeds',
         },
         {
-          onResponse: () => {
-            setLoading(false)
-          },
-          onError: (error) => {
-            console.log(error.error)
-            setLoading(false)
-            if (error.error.code === 'EMAIL_NOT_VERIFIED') {
-              sessionStorage.setItem('email_for_verification', values.identifier)
-              return router.push(`/auth/email-verification`)
-            }
-
-            const errorMessage = error.error.message || 'An unexpected error occurred.'
-            form.setError('identifier', { type: 'server' })
-            form.setError('password', { type: 'server', message: errorMessage })
-          },
+          onSuccess: handleSuccess,
+          onError: handleError,
         }
       )
     }
