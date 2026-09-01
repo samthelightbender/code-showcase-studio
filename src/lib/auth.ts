@@ -13,33 +13,23 @@ export const auth = betterAuth({
     emailOTP({
       otpLength: 6,
       expiresIn: 10 * 60, // 10 minutes in seconds
-      overrideDefaultEmailVerification: true,
       async sendVerificationOTP({ email, otp, type }) {
-        let targetEmail = email
-        if (!targetEmail.includes('@')) {
-          const user = await prisma.user.findUnique({
-            where: { username: targetEmail },
-          })
-          if (user?.email) {
-            targetEmail = user.email
-          }
-        }
 
         if (type === 'sign-in') {
           await sendEmail({
-            to: targetEmail,
+            to: email,
             subject: 'Your Sign-In OTP for Code Showcase Studio',
             text: `Your One-Time Password (OTP) for sign-in is: ${otp}. This OTP is valid for a short period.`,
           })
         } else if (type === 'email-verification') {
           await sendEmail({
-            to: targetEmail,
+            to: email,
             subject: 'Verify your email address for Code Showcase Studio',
             text: `Click the link to verify your email: ${otp}`,
           })
         } else {
           await sendEmail({
-            to: targetEmail,
+            to: email,
             subject: 'Password Reset Request for Code Showcase Studio',
             text: `You requested a password reset. Your One-Time Password (OTP) is: ${otp}. Use this OTP to reset your password. If you did not request this, please ignore this email.`,
           })
@@ -69,7 +59,6 @@ export const auth = betterAuth({
     enabled: true,
     autoSignIn: true,
     providerName: 'credentials',
-    requireEmailVerification: true,
     password: {
       hash: async (password) => {
         return await bcrypt.hash(password, 10)
