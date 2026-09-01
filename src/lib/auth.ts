@@ -11,22 +11,35 @@ export const auth = betterAuth({
   plugins: [
     openAPI(),
     emailOTP({
+      otpLength: 6,
+      expiresIn: 10 * 60, // 10 minutes in seconds
+      overrideDefaultEmailVerification: true,
       async sendVerificationOTP({ email, otp, type }) {
+        let targetEmail = email
+        if (!targetEmail.includes('@')) {
+          const user = await prisma.user.findUnique({
+            where: { username: targetEmail },
+          })
+          if (user?.email) {
+            targetEmail = user.email
+          }
+        }
+
         if (type === 'sign-in') {
           await sendEmail({
-            to: email,
+            to: targetEmail,
             subject: 'Your Sign-In OTP for Code Showcase Studio',
             text: `Your One-Time Password (OTP) for sign-in is: ${otp}. This OTP is valid for a short period.`,
           })
         } else if (type === 'email-verification') {
           await sendEmail({
-            to: email,
+            to: targetEmail,
             subject: 'Verify your email address for Code Showcase Studio',
             text: `Click the link to verify your email: ${otp}`,
           })
         } else {
           await sendEmail({
-            to: email,
+            to: targetEmail,
             subject: 'Password Reset Request for Code Showcase Studio',
             text: `You requested a password reset. Your One-Time Password (OTP) is: ${otp}. Use this OTP to reset your password. If you did not request this, please ignore this email.`,
           })
@@ -40,12 +53,10 @@ export const auth = betterAuth({
     }),
   ],
 
-  emailVerification: {
-    autoSignInAfterVerification: true,
-  },
   disabledPaths: [
     // Select some un-used path from better-auth
   ],
+
   trustedOrigins: [
     'http://localhost:3000',
     'http://localhost:3002',
@@ -53,6 +64,7 @@ export const auth = betterAuth({
     'localhost:3000',
     'localhost:3002',
   ],
+
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
@@ -67,6 +79,7 @@ export const auth = betterAuth({
       },
     },
   },
+
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -77,12 +90,14 @@ export const auth = betterAuth({
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
     },
   },
+
   account: {
     accountLinking: {
       enabled: true,
       trustedProviders: ['google', 'github', 'email-password'],
     },
   },
+
   database: prismaAdapter(prisma, {
     provider: 'postgresql',
   }),
@@ -104,5 +119,6 @@ export const auth = betterAuth({
     window: 60, // time window in seconds
     max: 30, // max requests in the window
   },
+
 })
 
