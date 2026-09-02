@@ -103,7 +103,7 @@ export function LoginForm() {
   }
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className="w-full max-w-sm">
       <CardHeader>
         <CardTitle className="text-lg md:text-xl">Sign In</CardTitle>
         <CardDescription className="text-xs md:text-sm">
@@ -239,7 +239,6 @@ export function LoginForm() {
           <Link
             href="/auth/register"
             className="text-xs text-neutral-500 hover:text-primary transition-colors"
-            target="_blank"
           >
             Belum punya akun? <span className="underline">Daftar di sini.</span>
           </Link>
