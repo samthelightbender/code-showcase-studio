@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { Code, Menu, X, LogOut, Rss, ChevronDown, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { LogoutAlert } from '@/app/auth/logout/_components/logout-alert'
 import authClient from '@/lib/auth-client'
 
 export default function Header() {
@@ -13,9 +13,9 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const [isLogoutAlertOpen, setIsLogoutAlertOpen] = useState(false)
 
   const { data: session, isPending } = authClient.useSession()
-  const router = useRouter()
 
   const handleScroll = () => {
     if (window.scrollY > 200) {
@@ -43,16 +43,6 @@ export default function Header() {
       document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [])
-
-  const handleLogout = async () => {
-    await authClient.signOut({
-      fetchOptions: {
-        onSuccess: () => {
-          router.push('/')
-        },
-      },
-    })
-  }
 
   return (
     <header className={`sticky top-0 z-50 transition-colors duration-500 ${bgColor}`}>
@@ -109,8 +99,9 @@ export default function Header() {
                     {session.user.name}
                   </span>
                   <ChevronDown
-                    className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''
-                      }`}
+                    className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${
+                      dropdownOpen ? 'rotate-180' : ''
+                    }`}
                   />
                 </button>
 
@@ -138,7 +129,7 @@ export default function Header() {
                         type="button"
                         onClick={() => {
                           setDropdownOpen(false)
-                          handleLogout()
+                          setIsLogoutAlertOpen(true)
                         }}
                         className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors text-left"
                       >
@@ -228,7 +219,7 @@ export default function Header() {
                     size="sm"
                     onClick={() => {
                       setMobileMenuOpen(false)
-                      handleLogout()
+                      setIsLogoutAlertOpen(true)
                     }}
                     className="text-destructive hover:bg-destructive/10 gap-1.5"
                   >
@@ -252,6 +243,10 @@ export default function Header() {
               </div>
             )}
           </div>
+        )}
+
+        {isLogoutAlertOpen && (
+          <LogoutAlert isOpen={isLogoutAlertOpen} onOpenChange={setIsLogoutAlertOpen} />
         )}
       </div>
     </header>
